@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_editor"
     android:layout_width="match_parent"
@@ -16,7 +17,7 @@
         android:layout_height="wrap_content">
 
         <TextView
-            android:text="Item Info :"
+            android:text="Supplier Info:"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/itemInfo_textView"
@@ -25,21 +26,22 @@
         <LinearLayout
             android:layout_height="wrap_content"
             android:layout_width="0dp"
-            android:layout_weight="2"
+            android:layout_weight="3"
             android:paddingLeft="4dp"
             android:orientation="vertical">
 
             <!-- Name field -->
-            <EditText
-                android:id="@+id/edit_item_name"
-                android:hint="Item Name"
-                android:inputType="textCapWords"
-                style="@style/EditorFieldStyle" />
 
             <!-- Breed field -->
             <EditText
-                android:id="@+id/edit_item_desc"
-                android:hint="Item Description"
+                android:id="@+id/edit_item_provider"
+                android:hint="Supplier"
+                android:inputType="textCapWords"
+                style="@style/EditorFieldStyle" />
+
+            <EditText
+                android:id="@+id/edit_item_provider_email"
+                android:hint="Supplier email"
                 android:inputType="textCapWords"
                 style="@style/EditorFieldStyle" />
 
@@ -58,33 +60,125 @@
         android:layout_height="wrap_content">
 
         <TextView
-            android:text="Item Inventory :"
+            android:text="Item Info :"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/textView"
+            android:id="@+id/textView6"
             android:layout_weight="1"/>
 
         <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_width="0dp"
-            android:layout_weight="2"
-            android:paddingLeft="4dp"
-            android:orientation="vertical">
+            android:layout_weight="2">
 
-            <!-- Name field -->
-            <EditText
-                android:id="@+id/edit_item_quantity"
-                android:hint="Item Quantity"
-                android:inputType="number"
-                style="@style/EditorFieldStyle" />
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:paddingLeft="4dp"
+                android:orientation="vertical">
 
-            <!-- Breed field -->
-            <EditText
-                android:id="@+id/edit_item_price"
-                android:hint="Item Price"
-                android:inputType="numberDecimal"
-                style="@style/EditorFieldStyle" />
+                <!-- Name field -->
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
+                    <TextView
+                        android:text="Name :"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView5"
+                        android:layout_weight="1"/>
+
+                    <EditText
+                        android:id="@+id/edit_item_name"
+                        android:hint="Item Name"
+                        android:inputType="textCapWords"
+                        style="@style/EditorFieldStyle"
+                        android:layout_weight="1"
+                        android:gravity="center"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:text="Price :"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView"
+                        android:layout_weight="1"/>
+
+                    <EditText
+                        android:id="@+id/edit_item_price"
+                        android:hint="Item Price"
+                        android:inputType="numberDecimal"
+                        style="@style/EditorFieldStyle"
+                        android:layout_weight="1"
+                        android:gravity="center_vertical|center"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:text="Stock :"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView2"
+                        android:layout_weight="1"/>
+
+                    <EditText
+                        android:id="@+id/edit_item_quantity"
+                        android:hint="Item Quantity"
+                        android:inputType="number"
+                        style="@style/EditorFieldStyle"
+                        android:layout_weight="1"
+                        android:gravity="center"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:text="Sold :"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView3"
+                        android:layout_weight="1"/>
+
+                    <EditText
+                        android:id="@+id/edit_item_sold"
+                        android:hint="Item Sold"
+                        android:inputType="number"
+                        style="@style/EditorFieldStyle"
+                        android:layout_weight="1"
+                        android:gravity="center"/>
+                </LinearLayout>
+
+                <!-- Breed field -->
+
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
+
+    <Button
+        android:text="Add Image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/addImage_button"/>
+
+    <ImageView
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        app:srcCompat="@mipmap/ic_launcher"
+        android:id="@+id/imageView"/>
 </LinearLayout>

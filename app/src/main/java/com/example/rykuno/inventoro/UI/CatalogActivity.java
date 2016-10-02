@@ -1,6 +1,7 @@
 package com.example.rykuno.inventoro.UI;
 
 import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.rykuno.inventoro.Adapters.InventoryCursorAdapter;
@@ -21,19 +23,20 @@ import com.example.rykuno.inventoro.R;
 
 public class CatalogActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
     private static final int INVENTORY_LOADER = 0;
-    InventoryCursorAdapter mAdapter;
+    private InventoryCursorAdapter mAdapter;
+    private ListView mListView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalog);
-
-        ListView listView = (ListView) findViewById(R.id.list_view);
+        mListView = (ListView) findViewById(R.id.list_view);
         View emptyView = findViewById(R.id.empty_view);
-        listView.setEmptyView(emptyView);
+        mListView.setEmptyView(emptyView);
         mAdapter = new InventoryCursorAdapter(this, null);
-        listView.setAdapter(mAdapter);
-        getLoaderManager().initLoader(INVENTORY_LOADER, null, this);
+        mListView.setAdapter(mAdapter);
 
+        getLoaderManager().initLoader(INVENTORY_LOADER, null, this);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -43,6 +46,15 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
             }
         });
 
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);
+                Uri currentPetUri = ContentUris.withAppendedId(InventoryContract.InventoryEntry.CONTENT_URI, id);
+                intent.setData(currentPetUri);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -71,12 +83,12 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
 
     private void insertItem() {
         ContentValues values = new ContentValues();
-        values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_NAME, "Soup");
-        values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUMMARY, "Tomato");
+        values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_NAME, "Poster");
+        values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER, "Walmart");
+        values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER_EMAIL, "WalmartService@gmail.com");
         values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_STOCK, 5);
         values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_PRICE, 13);
         values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SOLD, 3);
-
         Uri uri = getContentResolver().insert(InventoryContract.InventoryEntry.CONTENT_URI, values);
     }
 
@@ -86,7 +98,13 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         String[] projection = {
                 InventoryContract.InventoryEntry._ID,
                 InventoryContract.InventoryEntry.COLUMN_INVENTORY_NAME,
-                InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUMMARY,};
+                InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER,
+                InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER_EMAIL,
+                InventoryContract.InventoryEntry.COLUMN_INVENTORY_STOCK,
+                InventoryContract.InventoryEntry.COLUMN_INVENTORY_PRICE,
+                InventoryContract.InventoryEntry.COLUMN_INVENTORY_SOLD,
+               };
+
         return new CursorLoader(this, InventoryContract.InventoryEntry.CONTENT_URI,
                 projection, null, null,null);
     }
