@@ -23,6 +23,7 @@ import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -32,6 +33,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.appyvet.rangebar.RangeBar;
 import com.example.rykuno.inventoro.Data.InventoryContract;
 import com.example.rykuno.inventoro.R;
 
@@ -41,20 +43,28 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     private static final String LOG_TAG = EditorActivity.class.getSimpleName();
     private static final int EXISTING_PET_LOADER = 0;
-    public static final int REQUEST_CODE = 20;
+    public static final int REQUEST_CODE = 100;
     public static final int REQUEST_PERMISSION =200;
-    Uri imageUri;
-    String filePath;
+    private String filePath;
     private Uri mCurrentInventoryUri;
+    private int mAdjustQuantityAmount=10;
     private EditText mName_EditText;
     private EditText mSupplier_EditText;
     private EditText mStock_EditText;
     private EditText mPrice_EditText;
     private EditText mSold_EditText;
     private EditText mProviderEmail_EditText;
-    private Button mAddImageButton;
     private boolean mItemHasChanced = false;
-    private ImageView mImageView;
+    private RangeBar mRangeBar;
+    private Button mAddButtonQuantity;
+    private Button mOrderMore;
+    private Button mSubtractButtonQuantity;
+    private ImageView mPictureImageView;
+
+    private String mProvider;
+    private String mProviderEmail;
+    private String mItemName;
+
     private View.OnTouchListener mOnTouchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
@@ -85,8 +95,11 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mStock_EditText = (EditText) findViewById(R.id.edit_item_quantity);
         mSold_EditText = (EditText) findViewById(R.id.edit_item_sold);
         mProviderEmail_EditText = (EditText) findViewById(R.id.edit_item_provider_email);
-        mAddImageButton = (Button) findViewById(R.id.addImage_button);
-        mImageView = (ImageView) findViewById(R.id.imageView);
+        mAddButtonQuantity = (Button) findViewById(R.id.addQuantity_button);
+        mSubtractButtonQuantity = (Button) findViewById(R.id.subtractQuantity_button);
+        mRangeBar = (RangeBar) findViewById(R.id.rangebar);
+        mOrderMore = (Button) findViewById(R.id.orderMore_button);
+        mPictureImageView = (ImageView) findViewById(R.id.picture_imageView);
 
         mName_EditText.setOnTouchListener(mOnTouchListener);
         mSupplier_EditText.setOnTouchListener(mOnTouchListener);
@@ -95,30 +108,17 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mPrice_EditText.setOnTouchListener(mOnTouchListener);
         mProviderEmail_EditText.setOnTouchListener(mOnTouchListener);
 
-        mAddImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_PICK);
+        setupOnClickListeners();
+        askForMediaPermission();
+    }
 
-                //whre do we want to find the data?
-                File pictureDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-                String path = pictureDirectory.getPath();
-                Uri data = Uri.parse(path);
-
-                //set data and type.
-                intent.setDataAndType(data, "image/*");
-                startActivityForResult(intent, REQUEST_CODE);
-            }
-        });
-
+    private void askForMediaPermission(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                && ContextCompat.checkSelfPermission(EditorActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(EditorActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     REQUEST_PERMISSION);
             return;
         }
-
-
     }
 
     @Override
@@ -126,26 +126,20 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted.
+
             } else {
-                // User refused to grant permission.
+                //User denied permission
             }
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         if (resultCode == RESULT_OK){
-            //if everything processed successfully
             if (requestCode == REQUEST_CODE){
-                imageUri = data.getData();
-                    filePath = getImagePath(imageUri);
-                File file = new File(filePath);
-                Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
-
-
-                mImageView.setImageBitmap(bmp);
+                Uri imageUri = data.getData();
+                filePath = getImagePath(imageUri);
+                mPictureImageView.setImageBitmap(mediaPathToBitmap(filePath));
             }
         }
 
@@ -306,7 +300,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         if (mCurrentInventoryUri == null &&
                 TextUtils.isEmpty(nameString) && TextUtils.isEmpty(supplierStirng) &&
                 TextUtils.isEmpty(priceString) && TextUtils.isEmpty(mSold_EditText.getText().toString().trim())
-                && TextUtils.isEmpty(mStock_EditText.getText().toString().trim())) {
+                && TextUtils.isEmpty(mStock_EditText.getText().toString().trim()) && TextUtils.isEmpty(supplierEmailString)) {
             // Since no fields were modified, we can return early without creating a new pet.
             // No need to create ContentValues and no need to do any ContentProvider operations.
             return;
@@ -331,10 +325,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 Toast.makeText(this, "Item updated", Toast.LENGTH_SHORT).show();
             }
         }else {
-            // Otherwise this is an EXISTING pet, so update the pet with content URI: mCurrentPetUri
-            // and pass in the new ContentValues. Pass in null for the selection and selection args
-            // because mCurrentPetUri will already identify the correct row in the database that
-            // we want to modify.
             int rowsAffected = getContentResolver().update(mCurrentInventoryUri, values, null, null);
 
             // Show a toast message depending on whether or not the update was successful.
@@ -389,9 +379,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             int sold = data.getInt(soldColumnIndex);
             String picture = data.getString(pictureColumnIndex);
 
-            File file = new File(picture);
-            Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
-
+            mProvider = supplier;
+            mItemName = name;
+            mProviderEmail = supplierEmail;
 
             mName_EditText.setText(name);
             mSupplier_EditText.setText(supplier);
@@ -399,7 +389,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             mStock_EditText.setText(Integer.toString(stock));
             mPrice_EditText.setText(price);
             mSold_EditText.setText(Integer.toString(sold));
-            mImageView.setImageBitmap(bmp);
+            mPictureImageView.setImageBitmap(mediaPathToBitmap(picture));
         }
     }
 
@@ -429,10 +419,93 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         return path;
     }
-    
-    private Bitmap MediaPathToBitmap(String path){
+
+    private Bitmap mediaPathToBitmap(String path){
         File file = new File(path);
         Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
         return bmp;
+    }
+
+    private void setupOnClickListeners(){
+        mPictureImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                File pictureDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+                String path = pictureDirectory.getPath();
+                Uri data = Uri.parse(path);
+
+                //set data and type.
+                intent.setDataAndType(data, "image/*");
+                startActivityForResult(intent, REQUEST_CODE);
+            }
+        });
+        mRangeBar.setRangePinsByValue(1,10);
+        mRangeBar.setOnRangeBarChangeListener(new RangeBar.OnRangeBarChangeListener() {
+            @Override
+            public void onRangeChangeListener(RangeBar rangeBar, int leftPinIndex, int rightPinIndex, String leftPinValue, String rightPinValue) {
+                mAdjustQuantityAmount = Integer.parseInt(rightPinValue);
+            }
+        });
+
+        mAddButtonQuantity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mStock_EditText.getText().toString().trim().equals("") || mStock_EditText.getText().toString().trim() == null){
+                    int amount = 0;
+                    amount = amount+mAdjustQuantityAmount;
+                    mStock_EditText.setText(String.valueOf(amount));
+                }else{
+                    int amount = Integer.valueOf(mStock_EditText.getText().toString().trim());
+                    amount = amount+mAdjustQuantityAmount;
+                    mStock_EditText.setText(String.valueOf(amount));
+                }
+            }
+        });
+
+        mSubtractButtonQuantity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mStock_EditText.getText().toString().trim().equals("") || mStock_EditText.getText().toString().trim() == null){
+                    Toast.makeText(EditorActivity.this, "Cannot have negative stock", Toast.LENGTH_SHORT).show();
+                }else{
+                    int amount = Integer.valueOf(mStock_EditText.getText().toString().trim());
+                    if ((amount-mAdjustQuantityAmount)>=0) {
+                        amount = amount - mAdjustQuantityAmount;
+                        mStock_EditText.setText(String.valueOf(amount));
+                    }
+                }
+            }
+        });
+
+        mOrderMore.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mProvider != null && mItemName != null && mProviderEmail != null) {
+                    Intent intent = new Intent(Intent.ACTION_SENDTO);
+                    intent.setData(Uri.parse("mailto: " + mProviderEmail)); // only email apps should handle this
+                    intent.putExtra(Intent.EXTRA_EMAIL, mProvider);
+                    intent.putExtra(Intent.EXTRA_SUBJECT, "Order Request: " + mItemName);
+                    if (intent.resolveActivity(getPackageManager()) != null) {
+                        startActivity(intent);
+                    }
+                }
+            }
+        });
+    }
+
+    private void showDialog(){
+       View view = (LayoutInflater.from(this)).inflate(R.layout.edit_info_dialog, null);
+
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(EditorActivity.this);
+        alertBuilder.setView(view);
+
+        alertBuilder.setCancelable(true).setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+
     }
 }
