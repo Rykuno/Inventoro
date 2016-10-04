@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,11 +43,10 @@ public class InventoryCursorAdapter extends CursorAdapter {
         final Button sellButton = (Button) view.findViewById(R.id.sell_button);
         final int id = cursor.getInt(cursor.getColumnIndexOrThrow(InventoryContract.InventoryEntry._ID));
 
-
         final String name = cursor.getString(cursor.getColumnIndexOrThrow(InventoryContract.InventoryEntry.COLUMN_INVENTORY_NAME));
         final String provider = cursor.getString(cursor.getColumnIndexOrThrow(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER));
         final String providerEmail = cursor.getString(cursor.getColumnIndexOrThrow(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER_EMAIL));
-        String price = cursor.getString(cursor.getColumnIndexOrThrow(InventoryContract.InventoryEntry.COLUMN_INVENTORY_PRICE));
+        final String price = cursor.getString(cursor.getColumnIndexOrThrow(InventoryContract.InventoryEntry.COLUMN_INVENTORY_PRICE));
         final int stock = cursor.getInt(cursor.getColumnIndexOrThrow(InventoryContract.InventoryEntry.COLUMN_INVENTORY_STOCK));
         final int sold = cursor.getInt(cursor.getColumnIndexOrThrow(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SOLD));
 
@@ -80,19 +80,29 @@ public class InventoryCursorAdapter extends CursorAdapter {
         tvProvider.setText(provider);
 
         if (!price.contains(".")){
-            tvPrice.setText("$" + price + ".00");
+            if (price.contains("$")){
+                tvPrice.setText(price + ".00");
+            }else {
+                tvPrice.setText("$" + price + ".00");
+            }
         }else {
-            tvPrice.setText("$" + price);
+            if (price.contains("$")){
+                tvPrice.setText(price);
+            }else {
+                tvPrice.setText("$" + price);
+            }
         }
 
         if (stock==0){
             tvStock.setText("Out of stock");
             tvStock.setTextColor(Color.RED);
-            sellButton.setText("Restock");
+            sellButton.setText("Order");
+            sellButton.getBackground().setColorFilter(0xffffffff, PorterDuff.Mode.MULTIPLY);
         }else{
             tvStock.setText("Stock: "+ stock);
             tvStock.setTextColor(Color.GRAY);
             sellButton.setText("SELL");
+            sellButton.getBackground().setColorFilter(0xFF00FF00, PorterDuff.Mode.MULTIPLY);
         }
     }
 }

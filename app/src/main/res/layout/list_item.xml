@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-  >
+    xmlns:fbutton="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
 
     <LinearLayout
         android:orientation="horizontal"
@@ -16,7 +15,8 @@
             android:orientation="vertical"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:gravity="center_vertical">
 
             <TextView
                 android:id="@+id/name_textView"
@@ -25,7 +25,6 @@
                 android:fontFamily="sans-serif-medium"
                 android:textAppearance="?android:textAppearanceMedium"
                 android:textColor="#2B3D4D"
-                tools:text="Soup"
                 android:gravity="center"/>
 
             <TextView
@@ -35,7 +34,6 @@
                 android:fontFamily="sans-serif"
                 android:textAppearance="?android:textAppearanceSmall"
                 android:textColor="#AEB6BD"
-                tools:text="Walmart"
                 android:gravity="center"/>
 
         </LinearLayout>
@@ -44,33 +42,34 @@
             android:orientation="vertical"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:gravity="center_vertical">
 
             <TextView
-                android:text="TextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/price_textView"
-                android:gravity="center"
-                tools:text="$4.50"/>
+                android:gravity="center"/>
 
             <TextView
-                android:text="TextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/stock_textView"
-                android:gravity="center"
-                tools:text="Stock: 5"/>
+                android:gravity="center"/>
 
         </LinearLayout>
 
-        <Button
-            android:text="Sell"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+        <info.hoang8f.widget.FButton
             android:id="@+id/sell_button"
+            android:layout_margin="10dp"
+            android:textColor="@android:color/white"
+            fbutton:buttonColor="@color/fbutton_color_turquoise"
+            fbutton:shadowEnabled="true"
             android:focusable="false"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:text="@string/sell"
+            android:layout_width="75dp"
+            android:layout_height="40dp"/>
 
     </LinearLayout>
 

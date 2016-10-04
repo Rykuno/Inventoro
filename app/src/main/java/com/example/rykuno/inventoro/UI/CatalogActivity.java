@@ -83,6 +83,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
 
     private void insertItem() {
         ContentValues values = new ContentValues();
+
         values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_NAME, "Poster");
         values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER, "Walmart");
         values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER_EMAIL, "WalmartService@gmail.com");
@@ -91,7 +92,6 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SOLD, 3);
         Uri uri = getContentResolver().insert(InventoryContract.InventoryEntry.CONTENT_URI, values);
     }
-
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {

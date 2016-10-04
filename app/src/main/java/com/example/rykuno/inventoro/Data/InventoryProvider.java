@@ -75,7 +75,15 @@ public class InventoryProvider extends ContentProvider {
     @Nullable
     @Override
     public String getType(Uri uri) {
-        return null;
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case INVENTORY:
+                return InventoryContract.InventoryEntry.CONTENT_LIST_TYPE;
+            case INVENTORY_ID:
+                return InventoryContract.InventoryEntry.CONTENT_ITEM_TYPE;
+            default:
+                throw new IllegalStateException("Unknown URI " + uri + " with match " + match);
+        }
     }
 
     @Nullable
@@ -92,7 +100,24 @@ public class InventoryProvider extends ContentProvider {
 
     private Uri insertItem(Uri uri, ContentValues values) {
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
+        String supplierName = values.getAsString(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER);
+        String supplierEmail = values.getAsString(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER_EMAIL);
         String name = values.getAsString(InventoryContract.InventoryEntry.COLUMN_INVENTORY_NAME);
+        String price = values.getAsString(InventoryContract.InventoryEntry.COLUMN_INVENTORY_PRICE);
+        Integer stock = values.getAsInteger(InventoryContract.InventoryEntry.COLUMN_INVENTORY_STOCK);
+        Integer sold = values.getAsInteger(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SOLD);
+        if (supplierName == null || supplierName.equals(""))
+            throw new IllegalArgumentException("Supplier name required");
+        if (supplierEmail == null || supplierEmail.equals(""))
+            throw new IllegalArgumentException("Supplier email required");
+        if (name == null || name.equals(""))
+            throw new IllegalArgumentException("Item name required");
+        if (price == null || name.equals(""))
+            throw new IllegalArgumentException("Price required");
+        if (stock == null)
+            throw new IllegalArgumentException("Stock required");
+        if (sold == null)
+            throw new IllegalArgumentException("Sold amount required");
 
         long id = database.insert(InventoryContract.InventoryEntry.TABLE_NAME, null, values);
         if (id == -1){
@@ -146,6 +171,26 @@ public class InventoryProvider extends ContentProvider {
 
     private int updateItem(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
+        String supplierName = values.getAsString(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER);
+        String supplierEmail = values.getAsString(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER_EMAIL);
+        String name = values.getAsString(InventoryContract.InventoryEntry.COLUMN_INVENTORY_NAME);
+        String price = values.getAsString(InventoryContract.InventoryEntry.COLUMN_INVENTORY_PRICE);
+        Integer stock = values.getAsInteger(InventoryContract.InventoryEntry.COLUMN_INVENTORY_STOCK);
+        Integer sold = values.getAsInteger(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SOLD);
+
+        if (values.containsKey(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER) && supplierName == null)
+            throw new IllegalArgumentException("Supplier name required");
+        if (values.containsKey(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER_EMAIL) && supplierEmail == null)
+            throw new IllegalArgumentException("Supplier email required");
+        if (values.containsKey(InventoryContract.InventoryEntry.COLUMN_INVENTORY_NAME) && name == null )
+            throw new IllegalArgumentException("Item name required");
+        if (values.containsKey(InventoryContract.InventoryEntry.COLUMN_INVENTORY_PRICE) && price == null)
+            throw new IllegalArgumentException("Price required");
+        if (values.containsKey(InventoryContract.InventoryEntry.COLUMN_INVENTORY_STOCK) && stock == null)
+            throw new IllegalArgumentException("Stock required");
+        if (values.containsKey(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SOLD) && sold == null)
+            throw new IllegalArgumentException("Sold amount required");
+
         int rowsUpdated = database.update(InventoryContract.InventoryEntry.TABLE_NAME, values, selection, selectionArgs);
         if (rowsUpdated!=0){
             getContext().getContentResolver().notifyChange(uri,null);

@@ -1,21 +1,48 @@
 <resources>
+
     <string name="app_name">Inventoro</string>
     <string name="title_activity_main">Inventoro</string>
-
     <string name="action_save">Save</string>
-
+    <string name="increaseBy">Increase By</string>
+    <string name="decreaseBy">Decrease By</string>
     <string name="action_delete">Delete</string>
-
     <string name="unsaved_changes_dialog_msg">Discard your changes and quit editing?</string>
-
     <string name="discard">Discard</string>
-
     <string name="keep_editing">Keep Editing</string>
-
     <string name="delete">Delete</string>
-
     <string name="delete_dialog_msg">Delete Item?</string>
-
     <string name="cancel">Cancel</string>
+    <string name="fill_in_fields_stock_sold">Fill in Stock and Sold amounts</string>
+    <string name="error_updating">Error updating</string>
+    <string name="item_updated">Item updated</string>
+    <string name="delete_failed">Delete Failed</string>
+    <string name="delete_successful">Delete Successful</string>
+    <string name="add_item">Add an Item</string>
+    <string name="modify_item">Modify Item</string>
+    <string name="item_id">"Item Id : "</string>
+    <string name="empty_text"/>
+    <string name="dialog_ok">Ok</string>
+    <string name="insufficient_stock">Insufficient stock</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="fill_in_all_fields">Please fill in all fields</string>
+    <string name="sell">Sell</string>
+    <string name="price">Price</string>
+    <string name="supplier_info">Supplier Info</string>
+    <string name="stock">Stock</string>
+    <string name="sold">Sold</string>
+    <string name="edit_info">Edit Info</string>
+    <string name="order_more">Order More</string>
+    <string name="modify_stock">Modify Stock</string>
+    <string name="sell_amount">Sell Amount</string>
+    <string name="amount">Amount</string>
+    <string name="supplier_name">Supplier Name:</string>
+    <string name="name">name</string>
+    <string name="supplier_email">Supplier Email:</string>
+    <string name="email">email</string>
+    <string name="item_name">Item Name:</string>
+    <string name="item_price">Item Price:</string>
+    <string name="item_stock">Item Stock:</string>
+    <string name="item_sold">Item Sold:</string>
+    <string name="email_order_request">"Order Request: "</string>
 
 </resources>

@@ -1,66 +1,189 @@
 <?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:fbutton="http://schemas.android.com/tools"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
 
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:custom="http://schemas.android.com/apk/res-auto"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fillViewport="true"
-            android:background="@color/white">
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/activity_editor"
-    android:layout_width="match_parent"
-    android:orientation="vertical"
-    android:layout_height="match_parent"
-    android:padding="16dp"
-    tools:context="com.example.rykuno.inventoro.UI.EditorActivity"
-    android:background="@color/white">
+    <ImageButton
+        android:layout_width="175dp"
+        android:layout_height="175dp"
+        app:srcCompat="@drawable/add_image_icon"
+        android:layout_gravity="center"
+        android:scaleType="fitXY"
+        android:id="@+id/item_imageView"/>
 
+    <TextView
+        android:text="@string/item_id"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvItemId"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/tvItemName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textStyle="normal|bold"
+        android:layout_marginBottom="10dp"
+        android:textSize="20sp"/>
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/suppliertv"
-            android:layout_gravity="center"
-            android:text="Supplier Information"
-            android:textColor="@color/accent"
-            android:layout_height="match_parent"
-            android:layout_width="match_parent"
-            android:gravity="center_vertical|center_horizontal"
-            android:textSize="16sp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:textAllCaps="true"/>
-
         <LinearLayout
-            android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_weight="3"
-            android:paddingLeft="4dp"
-            android:orientation="vertical">
+            android:layout_height="wrap_content">
 
-            <EditText
-                android:id="@+id/edit_item_provider"
-                android:hint="Supplier"
-                android:inputType="textCapWords"
-                style="@style/EditorFieldStyle"
-                android:gravity="center"/>
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center">
 
-            <EditText
-                android:id="@+id/edit_item_provider_email"
-                android:hint="Supplier email"
-                android:inputType="textEmailAddress"
-                style="@style/EditorFieldStyle"
-                android:gravity="center_vertical|center"/>
+                <TextView
+                    android:text="@string/supplier_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textStyle="normal|bold"
+                    android:textSize="16sp"/>
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:id="@+id/tvSupplier"
+                    />
+
+                <TextView
+                    android:id="@+id/tvSupplierEmail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="10sp"
+                    android:textColor="@android:color/darker_gray"
+                    />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:gravity="center">
+
+                <TextView
+                    android:text="@string/price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="normal|bold"
+                    android:textSize="16sp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvItemPrice"
+                    />
+            </LinearLayout>
 
         </LinearLayout>
+
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <TextView
+                    android:text="@string/stock"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textStyle="normal|bold"
+                    android:textSize="16sp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvItemStock"
+                    android:layout_weight="1"
+                    />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:gravity="center">
+
+                <TextView
+                    android:text="@string/sold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="normal|bold"
+                    android:textSize="16sp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvItemSold"
+                    />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp">
+
+        <info.hoang8f.widget.FButton
+            android:id="@+id/editInfo_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:minHeight="@dimen/demo_button_min_height"
+            android:minWidth="@dimen/demo_button_min_width"
+            android:text="@string/edit_info"
+            android:textColor="@android:color/white"
+            fbutton:buttonColor="@color/fbutton_color_emerald"
+            fbutton:shadowEnabled="true"
+            android:layout_weight="1"/>
+
+        <info.hoang8f.widget.FButton
+            android:id="@+id/sell_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:minHeight="@dimen/demo_button_min_height"
+            android:minWidth="@dimen/demo_button_min_width"
+            android:text="@string/sell"
+            android:textColor="@android:color/white"
+            fbutton:buttonColor="@color/fbutton_color_turquoise"
+            fbutton:shadowEnabled="true"
+            android:layout_weight="1"/>
     </LinearLayout>
 
     <LinearLayout
@@ -69,191 +192,32 @@
         android:layout_height="wrap_content">
 
 
-            <LinearLayout
-                android:layout_height="wrap_content"
-                android:layout_width="0dp"
-                android:layout_weight="2"
-                android:paddingLeft="4dp"
-                android:orientation="vertical">
+        <info.hoang8f.widget.FButton
+            android:id="@+id/orderMore_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:minHeight="@dimen/demo_button_min_height"
+            android:minWidth="@dimen/demo_button_min_width"
+            android:text="@string/order_more"
+            android:textColor="@android:color/white"
+            fbutton:buttonColor="@color/fbutton_color_turquoise"
+            fbutton:shadowEnabled="true"
+            android:layout_weight="1"/>
 
-                <include
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    layout="@layout/divider"/>
+        <info.hoang8f.widget.FButton
+            android:id="@+id/modifyStock_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:minHeight="@dimen/demo_button_min_height"
+            android:minWidth="@dimen/demo_button_min_width"
+            android:textColor="@android:color/white"
+            fbutton:buttonColor="@color/fbutton_color_turquoise"
+            fbutton:shadowEnabled="true"
+            android:layout_weight="1"
+            android:text="@string/modify_stock"/>
 
-                    <TextView
-                        android:id="@+id/enableRange"
-                        android:layout_gravity="center"
-                        android:text="Item Information"
-                        android:textColor="@color/accent"
-                        android:layout_height="match_parent"
-                        android:layout_width="match_parent"
-                        android:gravity="center_vertical|center_horizontal"
-                        android:textSize="16sp"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginRight="8dp"
-                        android:textAllCaps="true"/>
-
-
-                <LinearLayout
-                    android:orientation="vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <TextView
-                        android:id="@+id/tv0"
-                        style="@style/RoboTheme"
-                        android:textSize="12sp"
-                        android:text="Name"/>
-
-                    <EditText
-                        android:id="@+id/edit_item_name"
-                        android:hint="Item Name"
-                        android:inputType="textCapWords"
-                        style="@style/EditorFieldStyle"
-                        android:layout_weight="1"
-                        android:gravity="center_vertical|center"
-                        android:layout_gravity="center"
-                        android:layout_width="match_parent"/>
-                </LinearLayout>
-
-
-
-                <LinearLayout
-                    android:orientation="vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <TextView
-                        android:id="@+id/tv1"
-                        style="@style/RoboTheme"
-                        android:textSize="12sp"
-                        android:text="Price"/>
-
-                    <EditText
-                        android:id="@+id/edit_item_price"
-                        android:hint="Item Price"
-                        android:inputType="numberDecimal"
-                        style="@style/EditorFieldStyle"
-                        android:layout_weight="1"
-                        android:gravity="center_vertical|center"/>
-                </LinearLayout>
-
-
-                <LinearLayout
-                    android:orientation="vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <TextView
-                        android:id="@+id/tv2"
-                        style="@style/RoboTheme"
-                        android:textSize="12sp"
-                        android:text="Quantity"/>
-
-                    <TextView
-                        android:id="@+id/tv6"
-                        style="@style/RoboTheme"
-                        android:textSize="10sp"
-                        android:text="Modify Quantity By..."/>
-
-                    <com.appyvet.rangebar.RangeBar
-                        android:id="@+id/rangebar"
-                        android:layout_width="match_parent"
-                        android:layout_height="72dp"
-                        custom:rangeBar="false"
-                        custom:temporaryPins="false"
-                        custom:tickStart="1"
-                        custom:tickInterval="1"
-                        custom:tickEnd="100"
-                        android:layout_marginLeft="16dp"
-                        android:layout_marginRight="16dp"/>
-
-                    <LinearLayout
-                        android:orientation="horizontal"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                        <Button
-                            android:text="-"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:id="@+id/subtractQuantity_button"/>
-
-                        <EditText
-                            android:id="@+id/edit_item_quantity"
-                            android:hint="Item Quantity"
-                            android:inputType="number"
-                            style="@style/EditorFieldStyle"
-                            android:gravity="center"
-                            android:layout_width="150dp"/>
-
-                        <Button
-                            android:text="+"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:id="@+id/addQuantity_button"/>
-                    </LinearLayout>
-
-                </LinearLayout>
-
-
-
-                <LinearLayout
-                    android:orientation="vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <TextView
-                        android:id="@+id/tv3"
-                        style="@style/RoboTheme"
-                        android:textSize="12sp"
-                        android:text="Items Sold"/>
-
-                    <EditText
-                        android:id="@+id/edit_item_sold"
-                        android:hint="Item Sold"
-                        android:inputType="number"
-                        style="@style/EditorFieldStyle"
-                        android:layout_weight="1"
-                        android:gravity="center"/>
-                </LinearLayout>
-
-                <include
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    layout="@layout/divider"/>
-
-                <LinearLayout
-                    android:orientation="vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <Button
-                        android:text="Order More"
-                        android:id="@+id/orderMore_button"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingBottom="3dp"
-                        />
-
-                    <include
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        layout="@layout/divider"/>
-
-
-                    <ImageView
-                        android:layout_width="150dp"
-                        android:layout_height="150dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/addimage"
-                        custom:srcCompat="@drawable/addimage"
-                        android:id="@+id/picture_imageView"/>
-                </LinearLayout>
-        </LinearLayout>
     </LinearLayout>
+
 </LinearLayout>
-    </ScrollView>

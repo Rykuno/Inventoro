@@ -2,6 +2,7 @@ package com.example.rykuno.inventoro.UI;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.LoaderManager;
 import android.content.ContentValues;
 import android.content.CursorLoader;
@@ -28,12 +29,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
+import android.widget.ImageButton;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.appyvet.rangebar.RangeBar;
 import com.example.rykuno.inventoro.Data.InventoryContract;
 import com.example.rykuno.inventoro.R;
 
@@ -41,34 +45,30 @@ import java.io.File;
 
 public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final String LOG_TAG = EditorActivity.class.getSimpleName();
-    private static final int EXISTING_PET_LOADER = 0;
+    private static final int EXISTING_ITEM_LOADER = 0;
     public static final int REQUEST_CODE = 100;
-    public static final int REQUEST_PERMISSION =200;
+    public static final int REQUEST_PERMISSION = 200;
     private String filePath;
     private Uri mCurrentInventoryUri;
-    private int mAdjustQuantityAmount=10;
-    private EditText mName_EditText;
-    private EditText mSupplier_EditText;
-    private EditText mStock_EditText;
-    private EditText mPrice_EditText;
-    private EditText mSold_EditText;
-    private EditText mProviderEmail_EditText;
     private boolean mItemHasChanced = false;
-    private RangeBar mRangeBar;
-    private Button mAddButtonQuantity;
-    private Button mOrderMore;
-    private Button mSubtractButtonQuantity;
-    private ImageView mPictureImageView;
-
-    private String mProvider;
-    private String mProviderEmail;
-    private String mItemName;
+    private TextView mTvItemName;
+    private TextView mTvItemId;
+    private TextView mTvItemPrice;
+    private TextView mTvItemStock;
+    private TextView mTvItemSold;
+    private TextView mTvSupplierName;
+    private TextView mTvSupplierEmail;
+    private Button mEditInfo_button;
+    private Button mSell_button;
+    private Button mOrderMore_button;
+    private Button mModifyStock_button;
+    private ImageButton mItem_imageView;
+    private boolean increaseBy;
 
     private View.OnTouchListener mOnTouchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            mItemHasChanced=true;
+            mItemHasChanced = true;
             return false;
         }
     };
@@ -82,37 +82,35 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mCurrentInventoryUri = intent.getData();
 
         if (mCurrentInventoryUri == null) {
-            setTitle("Add an Item");
+            setTitle(getString(R.string.add_item));
             invalidateOptionsMenu();
-        }else{
-            setTitle("Modify Item");
-            getLoaderManager().initLoader(EXISTING_PET_LOADER, null, this);
+        } else {
+            setTitle(getString(R.string.modify_item));
+            getLoaderManager().initLoader(EXISTING_ITEM_LOADER, null, this);
         }
 
-        mName_EditText = (EditText) findViewById(R.id.edit_item_name);
-        mSupplier_EditText = (EditText) findViewById(R.id.edit_item_provider);
-        mPrice_EditText = (EditText) findViewById(R.id.edit_item_price);
-        mStock_EditText = (EditText) findViewById(R.id.edit_item_quantity);
-        mSold_EditText = (EditText) findViewById(R.id.edit_item_sold);
-        mProviderEmail_EditText = (EditText) findViewById(R.id.edit_item_provider_email);
-        mAddButtonQuantity = (Button) findViewById(R.id.addQuantity_button);
-        mSubtractButtonQuantity = (Button) findViewById(R.id.subtractQuantity_button);
-        mRangeBar = (RangeBar) findViewById(R.id.rangebar);
-        mOrderMore = (Button) findViewById(R.id.orderMore_button);
-        mPictureImageView = (ImageView) findViewById(R.id.picture_imageView);
+        mTvItemId = (TextView) findViewById(R.id.tvItemId);
+        mTvItemName = (TextView) findViewById(R.id.tvItemName);
+        mTvItemPrice = (TextView) findViewById(R.id.tvItemPrice);
+        mTvItemStock = (TextView) findViewById(R.id.tvItemStock);
+        mTvItemSold = (TextView) findViewById(R.id.tvItemSold);
+        mTvSupplierName = (TextView) findViewById(R.id.tvSupplier);
+        mTvSupplierEmail = (TextView) findViewById(R.id.tvSupplierEmail);
+        mItem_imageView = (ImageButton) findViewById(R.id.item_imageView);
+        mEditInfo_button = (Button) findViewById(R.id.editInfo_button);
+        mModifyStock_button = (Button) findViewById(R.id.modifyStock_button);
+        mOrderMore_button = (Button) findViewById(R.id.orderMore_button);
+        mSell_button = (Button) findViewById(R.id.sell_button);
 
-        mName_EditText.setOnTouchListener(mOnTouchListener);
-        mSupplier_EditText.setOnTouchListener(mOnTouchListener);
-        mSold_EditText.setOnTouchListener(mOnTouchListener);
-        mStock_EditText.setOnTouchListener(mOnTouchListener);
-        mPrice_EditText.setOnTouchListener(mOnTouchListener);
-        mProviderEmail_EditText.setOnTouchListener(mOnTouchListener);
+        mEditInfo_button.setOnTouchListener(mOnTouchListener);
+        mSell_button.setOnTouchListener(mOnTouchListener);
+        mModifyStock_button.setOnTouchListener(mOnTouchListener);
 
         setupOnClickListeners();
         askForMediaPermission();
     }
 
-    private void askForMediaPermission(){
+    private void askForMediaPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
                 && ContextCompat.checkSelfPermission(EditorActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(EditorActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
@@ -135,17 +133,16 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK){
-            if (requestCode == REQUEST_CODE){
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_CODE) {
                 Uri imageUri = data.getData();
                 filePath = getImagePath(imageUri);
-                mPictureImageView.setImageBitmap(mediaPathToBitmap(filePath));
+                mItem_imageView.setImageBitmap(mediaPathToBitmap(filePath));
             }
         }
 
         super.onActivityResult(requestCode, resultCode, data);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -155,25 +152,28 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.action_save:
-                saveItem();
-                finish();
-            return true;
-
+                if (TextUtils.isEmpty(mTvSupplierName.getText().toString().trim()) || TextUtils.isEmpty(mTvSupplierEmail.getText().toString().trim())
+                        || TextUtils.isEmpty(mTvItemName.getText().toString().trim()) || TextUtils.isEmpty(mTvItemPrice.getText().toString().trim())
+                        || TextUtils.isEmpty(mTvItemStock.getText().toString().trim()) || TextUtils.isEmpty(mTvItemPrice.getText().toString().trim())){
+                    showConfirmDialog();
+                    return false;
+                }else {
+                    saveItem();
+                    finish();
+                    return true;
+                }
             case R.id.action_delete:
                 showDeleteConfirmationDialog();
                 return true;
 
             case android.R.id.home:
-                if (!mItemHasChanced){
+                if (!mItemHasChanced) {
                     NavUtils.navigateUpFromSameTask(EditorActivity.this);
                     return true;
                 }
 
-                // Otherwise if there are unsaved changes, setup a dialog to warn the user.
-                // Create a click listener to handle the user confirming that
-                // changes should be discarded.
                 DialogInterface.OnClickListener discardButtonClickListener =
                         new DialogInterface.OnClickListener() {
                             @Override
@@ -191,17 +191,15 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         return super.onOptionsItemSelected(item);
     }
 
-
     @Override
     public void onBackPressed() {
-        // If the pet hasn't changed, continue with handling back button press
+        // If the item hasn't changed, continue with handling back button press
         if (!mItemHasChanced) {
             super.onBackPressed();
             return;
         }
 
         // Otherwise if there are unsaved changes, setup a dialog to warn the user.
-        // Create a click listener to handle the user confirming that changes should be discarded.
         DialogInterface.OnClickListener discardButtonClickListener =
                 new DialogInterface.OnClickListener() {
                     @Override
@@ -215,18 +213,13 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         showUnsavedChangesDialog(discardButtonClickListener);
     }
 
-
     private void showUnsavedChangesDialog(
             DialogInterface.OnClickListener discardButtonClickListener) {
-        // Create an AlertDialog.Builder and set the message, and click listeners
-        // for the postivie and negative buttons on the dialog.
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.unsaved_changes_dialog_msg);
         builder.setPositiveButton(R.string.discard, discardButtonClickListener);
         builder.setNegativeButton(R.string.keep_editing, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                // User clicked the "Keep editing" button, so dismiss the dialog
-                // and continue editing the pet.
                 if (dialog != null) {
                     dialog.dismiss();
                 }
@@ -239,47 +232,36 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     private void showDeleteConfirmationDialog() {
-        // Create an AlertDialog.Builder and set the message, and click listeners
-        // for the postivie and negative buttons on the dialog.
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.delete_dialog_msg);
         builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                // User clicked the "Delete" button, so delete the pet.
                 deleteItem();
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                // User clicked the "Cancel" button, so dismiss the dialog
-                // and continue editing the pet.
                 if (dialog != null) {
                     dialog.dismiss();
                 }
             }
         });
 
-        // Create and show the AlertDialog
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
     }
 
     private void deleteItem() {
-        // Only perform the delete if this is an existing pet.
         if (mCurrentInventoryUri != null) {
-            // Call the ContentResolver to delete the pet at the given content URI.
-            // Pass in null for the selection and selection args because the mCurrentPetUri
-            // content URI already identifies the pet that we want.
             int rowsDeleted = getContentResolver().delete(mCurrentInventoryUri, null, null);
 
-            // Show a toast message depending on whether or not the delete was successful.
             if (rowsDeleted == 0) {
                 // If no rows were deleted, then there was an error with the delete.
-                Toast.makeText(this, "Delete Failed",
+                Toast.makeText(this, R.string.delete_failed,
                         Toast.LENGTH_SHORT).show();
             } else {
                 // Otherwise, the delete was successful and we can display a toast.
-                Toast.makeText(this, "Delete Successful",
+                Toast.makeText(this, R.string.delete_successful,
                         Toast.LENGTH_SHORT).show();
             }
         }
@@ -288,55 +270,42 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         finish();
     }
 
-
     private void saveItem() {
-        String nameString = mName_EditText.getText().toString().trim();
-        String supplierStirng = mSupplier_EditText.getText().toString().trim();
-        String supplierEmailString = mProviderEmail_EditText.getText().toString().trim();
-        String priceString = mPrice_EditText.getText().toString().trim();
-        int stockInt = Integer.parseInt(mStock_EditText.getText().toString().trim());
-        int soldInt = Integer.parseInt(mSold_EditText.getText().toString().trim());
+        String nameString = mTvItemName.getText().toString().trim();
+        String supplierStirng = mTvSupplierName.getText().toString().trim();
+        String supplierEmailString = mTvSupplierEmail.getText().toString().trim();
+        String priceString = mTvItemPrice.getText().toString().trim();
+        int stockInt = Integer.parseInt(mTvItemStock.getText().toString().trim());
+        int soldInt = Integer.parseInt(mTvItemSold.getText().toString().trim());
 
-        if (mCurrentInventoryUri == null &&
-                TextUtils.isEmpty(nameString) && TextUtils.isEmpty(supplierStirng) &&
-                TextUtils.isEmpty(priceString) && TextUtils.isEmpty(mSold_EditText.getText().toString().trim())
-                && TextUtils.isEmpty(mStock_EditText.getText().toString().trim()) && TextUtils.isEmpty(supplierEmailString)) {
-            // Since no fields were modified, we can return early without creating a new pet.
-            // No need to create ContentValues and no need to do any ContentProvider operations.
-            return;
-        }
-
-        ContentValues values = new ContentValues();
-        values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_NAME, nameString);
-        values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER, supplierStirng);
-        values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER_EMAIL, supplierEmailString);
-        values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_PRICE, priceString);
-        values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_STOCK, stockInt);
-        values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SOLD, soldInt);
-        values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_PICTURE, filePath);
-        if (mCurrentInventoryUri ==null) {
-            Uri newUri = getContentResolver().insert(InventoryContract.InventoryEntry.CONTENT_URI, values);
-            if (newUri == null) {
-                // If the new content URI is null, then there was an error with insertion.
-                Toast.makeText(this, "Error updating",
-                        Toast.LENGTH_SHORT).show();
+            ContentValues values = new ContentValues();
+            values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_NAME, nameString);
+            values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER, supplierStirng);
+            values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER_EMAIL, supplierEmailString);
+            values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_PRICE, priceString);
+            values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_STOCK, stockInt);
+            values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SOLD, soldInt);
+            values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_PICTURE, filePath);
+            if (mCurrentInventoryUri == null) {
+                Uri newUri = getContentResolver().insert(InventoryContract.InventoryEntry.CONTENT_URI, values);
+                if (newUri == null) {
+                    // If the new content URI is null, then there was an error with insertion.
+                    Toast.makeText(this, R.string.error_updating,
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, R.string.item_updated, Toast.LENGTH_SHORT).show();
+                }
             } else {
-                // Otherwise, the insertion was successful and we can display a toast.
-                Toast.makeText(this, "Item updated", Toast.LENGTH_SHORT).show();
-            }
-        }else {
-            int rowsAffected = getContentResolver().update(mCurrentInventoryUri, values, null, null);
-
-            // Show a toast message depending on whether or not the update was successful.
-            if (rowsAffected == 0) {
-                // If no rows were affected, then there was an error with the update.
-                Toast.makeText(this, "Error Updating",
-                        Toast.LENGTH_SHORT).show();
-            } else {
-                // Otherwise, the update was successful and we can display a toast.
-                Toast.makeText(this, "Item Updated",
-                        Toast.LENGTH_SHORT).show();
-            }
+                int rowsAffected = getContentResolver().update(mCurrentInventoryUri, values, null, null);
+                if (rowsAffected == 0) {
+                    // If no rows were affected, then there was an error with the update.
+                    Toast.makeText(this, R.string.error_updating,
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    // Otherwise, the update was successful and we can display a toast.
+                    Toast.makeText(this, R.string.item_updated,
+                            Toast.LENGTH_SHORT).show();
+                }
         }
     }
 
@@ -352,17 +321,17 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 InventoryContract.InventoryEntry.COLUMN_INVENTORY_SOLD,
                 InventoryContract.InventoryEntry.COLUMN_INVENTORY_PICTURE
         };
-
         return new CursorLoader(this, mCurrentInventoryUri, projection, null, null, null);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if (data == null || data.getCount() < 1){
+        if (data == null || data.getCount() < 1) {
             return;
         }
 
-        if (data.moveToFirst()){
+        if (data.moveToFirst()) {
+            int idColumnIndex = data.getColumnIndex(InventoryContract.InventoryEntry._ID);
             int nameColumnIndex = data.getColumnIndex(InventoryContract.InventoryEntry.COLUMN_INVENTORY_NAME);
             int supplierColumnIndex = data.getColumnIndex(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER);
             int supplierEmailColumnIndex = data.getColumnIndex(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER_EMAIL);
@@ -373,41 +342,41 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
             String name = data.getString(nameColumnIndex);
             String supplier = data.getString(supplierColumnIndex);
-            String supplierEmail = data.getString(supplierEmailColumnIndex);
-            int stock = data.getInt(stockColumnIndex);
+            String suppierEmail = data.getString(supplierEmailColumnIndex);
             String price = data.getString(priceColumnIndex);
-            int sold = data.getInt(soldColumnIndex);
             String picture = data.getString(pictureColumnIndex);
+            int sold = data.getInt(soldColumnIndex);
+            int stock = data.getInt(stockColumnIndex);
+            int id = data.getInt(idColumnIndex);
 
-            mProvider = supplier;
-            mItemName = name;
-            mProviderEmail = supplierEmail;
+            mTvItemId.setText(getString(R.string.item_id) + String.valueOf(id));
+            mTvItemName.setText(name);
+            mTvSupplierName.setText(supplier);
+            mTvSupplierEmail.setText(suppierEmail);
+            mTvItemStock.setText(Integer.toString(stock));
+            mTvItemSold.setText(Integer.toString(sold));
+            mTvItemPrice.setText(formatPrice(price));
 
-            mName_EditText.setText(name);
-            mSupplier_EditText.setText(supplier);
-            mProviderEmail_EditText.setText(supplierEmail);
-            mStock_EditText.setText(Integer.toString(stock));
-            mPrice_EditText.setText(price);
-            mSold_EditText.setText(Integer.toString(sold));
-            mPictureImageView.setImageBitmap(mediaPathToBitmap(picture));
+            if (picture != null)
+                mItem_imageView.setImageBitmap(mediaPathToBitmap(picture));
         }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        mName_EditText.setText("");
-        mPrice_EditText.setText("");
-        mProviderEmail_EditText.setText("");
-        mSupplier_EditText.setText("");
-        mStock_EditText.setText("");
-        mPrice_EditText.setText("");
+        mTvItemName.setText(R.string.empty_text);
+        mTvItemPrice.setText(R.string.empty_text);
+        mTvItemSold.setText(R.string.empty_text);
+        mTvItemStock.setText(R.string.empty_text);
+        mTvSupplierName.setText(R.string.empty_text);
+        mTvSupplierEmail.setText(R.string.empty_text);
     }
 
-    public String getImagePath(Uri uri){
+    public String getImagePath(Uri uri) {
         Cursor cursor = getContentResolver().query(uri, null, null, null, null);
         cursor.moveToFirst();
         String document_id = cursor.getString(0);
-        document_id = document_id.substring(document_id.lastIndexOf(":")+1);
+        document_id = document_id.substring(document_id.lastIndexOf(":") + 1);
         cursor.close();
 
         cursor = getContentResolver().query(
@@ -420,14 +389,22 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         return path;
     }
 
-    private Bitmap mediaPathToBitmap(String path){
+    private Bitmap mediaPathToBitmap(String path) {
         File file = new File(path);
         Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
         return bmp;
     }
 
-    private void setupOnClickListeners(){
-        mPictureImageView.setOnClickListener(new View.OnClickListener() {
+    private void setupOnClickListeners() {
+
+        mModifyStock_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showModifyStockDialog();
+            }
+        });
+
+        mItem_imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_PICK);
@@ -440,72 +417,231 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 startActivityForResult(intent, REQUEST_CODE);
             }
         });
-        mRangeBar.setRangePinsByValue(1,10);
-        mRangeBar.setOnRangeBarChangeListener(new RangeBar.OnRangeBarChangeListener() {
+
+        mEditInfo_button.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onRangeChangeListener(RangeBar rangeBar, int leftPinIndex, int rightPinIndex, String leftPinValue, String rightPinValue) {
-                mAdjustQuantityAmount = Integer.parseInt(rightPinValue);
+            public void onClick(View v) {
+                showEditDialog();
             }
         });
 
-        mAddButtonQuantity.setOnClickListener(new View.OnClickListener() {
+        mSell_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mStock_EditText.getText().toString().trim().equals("") || mStock_EditText.getText().toString().trim() == null){
-                    int amount = 0;
-                    amount = amount+mAdjustQuantityAmount;
-                    mStock_EditText.setText(String.valueOf(amount));
-                }else{
-                    int amount = Integer.valueOf(mStock_EditText.getText().toString().trim());
-                    amount = amount+mAdjustQuantityAmount;
-                    mStock_EditText.setText(String.valueOf(amount));
-                }
+                if (!mTvItemStock.getText().toString().trim().equals("") && !mTvItemSold.getText().toString().trim().equals(""))
+                    showSellDialog();
+                else
+                    Toast.makeText(EditorActivity.this, R.string.fill_in_fields_stock_sold, Toast.LENGTH_SHORT).show();
             }
         });
 
-        mSubtractButtonQuantity.setOnClickListener(new View.OnClickListener() {
+        mOrderMore_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mStock_EditText.getText().toString().trim().equals("") || mStock_EditText.getText().toString().trim() == null){
-                    Toast.makeText(EditorActivity.this, "Cannot have negative stock", Toast.LENGTH_SHORT).show();
-                }else{
-                    int amount = Integer.valueOf(mStock_EditText.getText().toString().trim());
-                    if ((amount-mAdjustQuantityAmount)>=0) {
-                        amount = amount - mAdjustQuantityAmount;
-                        mStock_EditText.setText(String.valueOf(amount));
-                    }
-                }
-            }
-        });
-
-        mOrderMore.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mProvider != null && mItemName != null && mProviderEmail != null) {
-                    Intent intent = new Intent(Intent.ACTION_SENDTO);
-                    intent.setData(Uri.parse("mailto: " + mProviderEmail)); // only email apps should handle this
-                    intent.putExtra(Intent.EXTRA_EMAIL, mProvider);
-                    intent.putExtra(Intent.EXTRA_SUBJECT, "Order Request: " + mItemName);
-                    if (intent.resolveActivity(getPackageManager()) != null) {
-                        startActivity(intent);
-                    }
+                Intent intent = new Intent(Intent.ACTION_SENDTO);
+                intent.setData(Uri.parse("mailto: " + mTvSupplierEmail.getText().toString().trim())); // only email apps should handle this
+                intent.putExtra(Intent.EXTRA_EMAIL, mTvSupplierName.getText().toString().trim());
+                intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.email_order_request) + mTvItemName.getText().toString().trim());
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(intent);
                 }
             }
         });
     }
 
-    private void showDialog(){
-       View view = (LayoutInflater.from(this)).inflate(R.layout.edit_info_dialog, null);
+    private void showModifyStockDialog() {
+        View view = (LayoutInflater.from(EditorActivity.this)).inflate(R.layout.modify_stock_dialog, null);
+        AlertDialog.Builder modifyStockDialog = new AlertDialog.Builder(EditorActivity.this);
+        modifyStockDialog.setView(view);
+        modifyStockDialog.setCancelable(true);
+        final EditText modifyAmountBy = (EditText) view.findViewById(R.id.modifyStockBy_editText);
+        Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
 
-        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(EditorActivity.this);
-        alertBuilder.setView(view);
+        ArrayAdapter SpinnerAdapter = ArrayAdapter.createFromResource(this,
+                R.array.array_spinner_options, android.R.layout.simple_spinner_item);
 
-        alertBuilder.setCancelable(true).setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+        // Specify dropdown layout style - simple list view with 1 item per line
+        SpinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+        spinner.setAdapter(SpinnerAdapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selection = (String) parent.getItemAtPosition(position);
+                if (!TextUtils.isEmpty(selection)) {
+                    if (selection.equals(getString(R.string.increaseBy))) {
+                        increaseBy = true;
+                    } else if (selection.equals(getString(R.string.decreaseBy))) {
+                        increaseBy = false;
+                    }
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                increaseBy = true;
+            }
+        });
+
+        modifyStockDialog.setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                if (!modifyAmountBy.getText().toString().trim().matches(getString(R.string.empty_text))) {
+                    int originalStock = Integer.parseInt(mTvItemStock.getText().toString().trim());
+                    int modifiedStock = Integer.parseInt(modifyAmountBy.getText().toString().trim());
+                    if (increaseBy == true) {
+                        mTvItemStock.setText(String.valueOf(originalStock + modifiedStock));
+                    } else if (increaseBy == false && (originalStock - modifiedStock) >= 0) {
+                        mTvItemStock.setText(String.valueOf(originalStock - modifiedStock));
+                    } else {
+                        Toast.makeText(EditorActivity.this, R.string.insufficient_stock, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        });
+
+        modifyStockDialog.setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        Dialog dialog = modifyStockDialog.create();
+        dialog.show();
+    }
+
+    private void showSellDialog(){
+        View view = (LayoutInflater.from(EditorActivity.this)).inflate(R.layout.sell_dialog, null);
+        AlertDialog.Builder sellDialog = new AlertDialog.Builder(EditorActivity.this);
+        sellDialog.setView(view);
+        sellDialog.setCancelable(false);
+
+        final EditText mSellAmount_editText = (EditText) view.findViewById(R.id.sellAmount_editText);
+
+        sellDialog.setPositiveButton(R.string.sell, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (!mSellAmount_editText.getText().toString().trim().matches("")) {
+                    int stock = Integer.parseInt(mTvItemStock.getText().toString().trim());
+                    int sellAmount = Integer.parseInt(mSellAmount_editText.getText().toString().trim());
+                    if ((stock - sellAmount) >= 0) {
+                        int newSoldAmount = Integer.parseInt(mTvItemSold.getText().toString().trim()) + sellAmount;
+                        mTvItemSold.setText(String.valueOf(newSoldAmount));
+                        mTvItemStock.setText(String.valueOf(stock - sellAmount));
+                    } else {
+                        Toast.makeText(EditorActivity.this, R.string.insufficient_stock, Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+        });
+
+        sellDialog.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+        Dialog dialog = sellDialog.create();
+        dialog.show();
+    }
+
+    private void showEditDialog(){
+        View view = (LayoutInflater.from(EditorActivity.this)).inflate(R.layout.edit_info_dialog, null);
+        AlertDialog.Builder editDialog = new AlertDialog.Builder(EditorActivity.this);
+        editDialog.setView(view);
+        editDialog.setCancelable(false);
+
+        final EditText mSupplierName_editText = (EditText) view.findViewById(R.id.supplierName_editText);
+        final EditText mSupplierEmail_editText = (EditText) view.findViewById(R.id.supplierEmail_editText);
+        final EditText mItemName_editText = (EditText) view.findViewById(R.id.itemName_editText);
+        final EditText mItemPrice_editText = (EditText) view.findViewById(R.id.itemPrice_editText);
+        final EditText mItemStock_editText = (EditText) view.findViewById(R.id.itemStock_editText);
+        final EditText mItemSold_editText = (EditText) view.findViewById(R.id.itemSold_editText);
+
+        if (mTvSupplierName.getText().toString() != null)
+            mSupplierName_editText.setText(mTvSupplierName.getText().toString().trim());
+        if (mTvSupplierEmail.getText().toString() != null)
+            mSupplierEmail_editText.setText(mTvSupplierEmail.getText().toString().trim());
+        if (mTvItemName.getText().toString() != null)
+            mItemName_editText.setText(mTvItemName.getText().toString().trim());
+        if (mTvItemPrice.getText().toString() != null)
+            mItemPrice_editText.setText(mTvItemPrice.getText().toString().trim());
+        if (mTvItemSold.getText().toString() != null)
+            mItemSold_editText.setText(mTvItemSold.getText().toString().trim());
+        if (mTvItemStock.getText().toString() != null)
+            mItemStock_editText.setText(mTvItemStock.getText().toString().trim());
+
+        //To take care of formatting issues
+        if (mItemPrice_editText.getText().toString().trim().equals("$.00"))
+            mItemPrice_editText.setText(R.string.empty_text);
+
+        editDialog.setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                    mTvSupplierName.setText(mSupplierName_editText.getText().toString().trim());
+                    mTvSupplierEmail.setText(mSupplierEmail_editText.getText().toString().trim());
+                    mTvItemName.setText(mItemName_editText.getText().toString().trim());
+                    mTvItemStock.setText(mItemStock_editText.getText().toString().trim());
+                    mTvItemSold.setText(mItemSold_editText.getText().toString().trim());
+
+                if (mItemPrice_editText.getText().toString().trim().matches(getString(R.string.empty_text)))
+                    mTvItemPrice.setText(R.string.empty_text);
+                else
+                    mTvItemPrice.setText(formatPrice(mItemPrice_editText.getText().toString().trim()));
 
             }
         });
 
+        editDialog.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+        Dialog dialog = editDialog.create();
+        dialog.show();
     }
+
+    private void showConfirmDialog(){
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case DialogInterface.BUTTON_POSITIVE:
+                        //Yes button clicked
+                        break;
+
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //No button clicked
+                        break;
+                }
+            }
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(EditorActivity.this);
+        builder.setMessage(R.string.fill_in_all_fields).setPositiveButton(R.string.dialog_ok, dialogClickListener).show();
+    }
+
+    private String formatPrice(String price){
+        if (!price.contains(".")){
+            if (price.contains("$")){
+                return price + ".00";
+            }else {
+                return "$" + price + ".00";
+            }
+        }else {
+            if (price.contains("$")){
+                return price;
+            }else {
+                return "$" + price;
+            }
+        }
+    }
+
 }
