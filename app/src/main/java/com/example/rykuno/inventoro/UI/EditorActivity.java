@@ -42,6 +42,10 @@ import com.example.rykuno.inventoro.Data.InventoryContract;
 import com.example.rykuno.inventoro.R;
 
 import java.io.File;
+import java.text.NumberFormat;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -51,19 +55,33 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private String filePath;
     private Uri mCurrentInventoryUri;
     private boolean mItemHasChanced = false;
-    private TextView mTvItemName;
-    private TextView mTvItemId;
-    private TextView mTvItemPrice;
-    private TextView mTvItemStock;
-    private TextView mTvItemSold;
-    private TextView mTvSupplierName;
-    private TextView mTvSupplierEmail;
-    private Button mEditInfo_button;
-    private Button mSell_button;
-    private Button mOrderMore_button;
-    private Button mModifyStock_button;
-    private ImageButton mItem_imageView;
     private boolean increaseBy;
+
+    @BindView(R.id.tvItemId)
+    TextView mTvItemId;
+    @BindView(R.id.tvItemName)
+    TextView mTvItemName;
+    @BindView(R.id.tvItemPrice)
+    TextView mTvItemPrice;
+    @BindView(R.id.tvItemStock)
+    TextView mTvItemStock;
+    @BindView(R.id.tvItemSold)
+    TextView mTvItemSold;
+    @BindView(R.id.tvSupplier)
+    TextView mTvSupplierName;
+    @BindView(R.id.tvSupplierEmail)
+    TextView mTvSupplierEmail;
+    @BindView(R.id.editInfo_button)
+    Button mEditInfo_button;
+    @BindView(R.id.sell_button)
+    Button mSell_button;
+    @BindView(R.id.orderMore_button)
+    Button mOrderMore_button;
+    @BindView(R.id.modifyStock_button)
+    Button mModifyStock_button;
+    @BindView(R.id.item_imageView)
+    ImageButton mItem_imageView;
+
 
     private View.OnTouchListener mOnTouchListener = new View.OnTouchListener() {
         @Override
@@ -77,6 +95,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
+        ButterKnife.bind(this);
 
         Intent intent = getIntent();
         mCurrentInventoryUri = intent.getData();
@@ -88,19 +107,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             setTitle(getString(R.string.modify_item));
             getLoaderManager().initLoader(EXISTING_ITEM_LOADER, null, this);
         }
-
-        mTvItemId = (TextView) findViewById(R.id.tvItemId);
-        mTvItemName = (TextView) findViewById(R.id.tvItemName);
-        mTvItemPrice = (TextView) findViewById(R.id.tvItemPrice);
-        mTvItemStock = (TextView) findViewById(R.id.tvItemStock);
-        mTvItemSold = (TextView) findViewById(R.id.tvItemSold);
-        mTvSupplierName = (TextView) findViewById(R.id.tvSupplier);
-        mTvSupplierEmail = (TextView) findViewById(R.id.tvSupplierEmail);
-        mItem_imageView = (ImageButton) findViewById(R.id.item_imageView);
-        mEditInfo_button = (Button) findViewById(R.id.editInfo_button);
-        mModifyStock_button = (Button) findViewById(R.id.modifyStock_button);
-        mOrderMore_button = (Button) findViewById(R.id.orderMore_button);
-        mSell_button = (Button) findViewById(R.id.sell_button);
 
         mEditInfo_button.setOnTouchListener(mOnTouchListener);
         mSell_button.setOnTouchListener(mOnTouchListener);
@@ -156,10 +162,10 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             case R.id.action_save:
                 if (TextUtils.isEmpty(mTvSupplierName.getText().toString().trim()) || TextUtils.isEmpty(mTvSupplierEmail.getText().toString().trim())
                         || TextUtils.isEmpty(mTvItemName.getText().toString().trim()) || TextUtils.isEmpty(mTvItemPrice.getText().toString().trim())
-                        || TextUtils.isEmpty(mTvItemStock.getText().toString().trim()) || TextUtils.isEmpty(mTvItemPrice.getText().toString().trim())){
+                        || TextUtils.isEmpty(mTvItemStock.getText().toString().trim()) || TextUtils.isEmpty(mTvItemPrice.getText().toString().trim())) {
                     showConfirmDialog();
                     return false;
-                }else {
+                } else {
                     saveItem();
                     finish();
                     return true;
@@ -278,34 +284,34 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         int stockInt = Integer.parseInt(mTvItemStock.getText().toString().trim());
         int soldInt = Integer.parseInt(mTvItemSold.getText().toString().trim());
 
-            ContentValues values = new ContentValues();
-            values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_NAME, nameString);
-            values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER, supplierStirng);
-            values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER_EMAIL, supplierEmailString);
-            values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_PRICE, priceString);
-            values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_STOCK, stockInt);
-            values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SOLD, soldInt);
-            values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_PICTURE, filePath);
-            if (mCurrentInventoryUri == null) {
-                Uri newUri = getContentResolver().insert(InventoryContract.InventoryEntry.CONTENT_URI, values);
-                if (newUri == null) {
-                    // If the new content URI is null, then there was an error with insertion.
-                    Toast.makeText(this, R.string.error_updating,
-                            Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, R.string.item_updated, Toast.LENGTH_SHORT).show();
-                }
+        ContentValues values = new ContentValues();
+        values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_NAME, nameString);
+        values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER, supplierStirng);
+        values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER_EMAIL, supplierEmailString);
+        values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_PRICE, priceString);
+        values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_STOCK, stockInt);
+        values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SOLD, soldInt);
+        values.put(InventoryContract.InventoryEntry.COLUMN_INVENTORY_PICTURE, filePath);
+        if (mCurrentInventoryUri == null) {
+            Uri newUri = getContentResolver().insert(InventoryContract.InventoryEntry.CONTENT_URI, values);
+            if (newUri == null) {
+                // If the new content URI is null, then there was an error with insertion.
+                Toast.makeText(this, R.string.error_updating,
+                        Toast.LENGTH_SHORT).show();
             } else {
-                int rowsAffected = getContentResolver().update(mCurrentInventoryUri, values, null, null);
-                if (rowsAffected == 0) {
-                    // If no rows were affected, then there was an error with the update.
-                    Toast.makeText(this, R.string.error_updating,
-                            Toast.LENGTH_SHORT).show();
-                } else {
-                    // Otherwise, the update was successful and we can display a toast.
-                    Toast.makeText(this, R.string.item_updated,
-                            Toast.LENGTH_SHORT).show();
-                }
+                Toast.makeText(this, R.string.item_updated, Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            int rowsAffected = getContentResolver().update(mCurrentInventoryUri, values, null, null);
+            if (rowsAffected == 0) {
+                // If no rows were affected, then there was an error with the update.
+                Toast.makeText(this, R.string.error_updating,
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                // Otherwise, the update was successful and we can display a toast.
+                Toast.makeText(this, R.string.item_updated,
+                        Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -512,7 +518,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         dialog.show();
     }
 
-    private void showSellDialog(){
+    private void showSellDialog() {
         View view = (LayoutInflater.from(EditorActivity.this)).inflate(R.layout.sell_dialog, null);
         AlertDialog.Builder sellDialog = new AlertDialog.Builder(EditorActivity.this);
         sellDialog.setView(view);
@@ -549,7 +555,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         dialog.show();
     }
 
-    private void showEditDialog(){
+    private void showEditDialog() {
         View view = (LayoutInflater.from(EditorActivity.this)).inflate(R.layout.edit_info_dialog, null);
         AlertDialog.Builder editDialog = new AlertDialog.Builder(EditorActivity.this);
         editDialog.setView(view);
@@ -575,18 +581,14 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         if (mTvItemStock.getText().toString() != null)
             mItemStock_editText.setText(mTvItemStock.getText().toString().trim());
 
-        //To take care of formatting issues
-        if (mItemPrice_editText.getText().toString().trim().equals("$.00"))
-            mItemPrice_editText.setText(R.string.empty_text);
-
         editDialog.setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                    mTvSupplierName.setText(mSupplierName_editText.getText().toString().trim());
-                    mTvSupplierEmail.setText(mSupplierEmail_editText.getText().toString().trim());
-                    mTvItemName.setText(mItemName_editText.getText().toString().trim());
-                    mTvItemStock.setText(mItemStock_editText.getText().toString().trim());
-                    mTvItemSold.setText(mItemSold_editText.getText().toString().trim());
+                mTvSupplierName.setText(mSupplierName_editText.getText().toString().trim());
+                mTvSupplierEmail.setText(mSupplierEmail_editText.getText().toString().trim());
+                mTvItemName.setText(mItemName_editText.getText().toString().trim());
+                mTvItemStock.setText(mItemStock_editText.getText().toString().trim());
+                mTvItemSold.setText(mItemSold_editText.getText().toString().trim());
 
                 if (mItemPrice_editText.getText().toString().trim().matches(getString(R.string.empty_text)))
                     mTvItemPrice.setText(R.string.empty_text);
@@ -608,11 +610,11 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         dialog.show();
     }
 
-    private void showConfirmDialog(){
+    private void showConfirmDialog() {
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                switch (which){
+                switch (which) {
                     case DialogInterface.BUTTON_POSITIVE:
                         //Yes button clicked
                         break;
@@ -628,20 +630,11 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         builder.setMessage(R.string.fill_in_all_fields).setPositiveButton(R.string.dialog_ok, dialogClickListener).show();
     }
 
-    private String formatPrice(String price){
-        if (!price.contains(".")){
-            if (price.contains("$")){
-                return price + ".00";
-            }else {
-                return "$" + price + ".00";
-            }
-        }else {
-            if (price.contains("$")){
-                return price;
-            }else {
-                return "$" + price;
-            }
-        }
+    private String formatPrice(String price) {
+        price = price.replace(getString(R.string.dollar_sign), getString(R.string.empty_text));
+        double money = Double.valueOf(price);
+        NumberFormat formatter = NumberFormat.getCurrencyInstance();
+        return formatter.format(money);
     }
 
 }

@@ -22,9 +22,10 @@ public class InventoryProvider extends ContentProvider {
     private static final int INVENTORY_ID = 1;
 
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-    static{
+
+    static {
         sUriMatcher.addURI(InventoryContract.CONTENT_AUTHORITY, InventoryContract.PATH_INVENTORY, INVENTORY);
-        sUriMatcher.addURI(InventoryContract.CONTENT_AUTHORITY, InventoryContract.PATH_INVENTORY+ "/#", INVENTORY_ID);
+        sUriMatcher.addURI(InventoryContract.CONTENT_AUTHORITY, InventoryContract.PATH_INVENTORY + "/#", INVENTORY_ID);
     }
 
     @Override
@@ -41,7 +42,7 @@ public class InventoryProvider extends ContentProvider {
         Cursor cursor;
 
         int match = sUriMatcher.match(uri);
-        switch (match){
+        switch (match) {
             case INVENTORY:
                 cursor = database.query(
                         InventoryContract.InventoryEntry.TABLE_NAME,
@@ -68,8 +69,8 @@ public class InventoryProvider extends ContentProvider {
                 throw new IllegalArgumentException("Cannot query unknown URI " + uri);
         }
 
-            cursor.setNotificationUri(getContext().getContentResolver(), uri);
-            return cursor;
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+        return cursor;
     }
 
     @Nullable
@@ -90,7 +91,7 @@ public class InventoryProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         final int match = sUriMatcher.match(uri);
-        switch (match){
+        switch (match) {
             case INVENTORY:
                 return insertItem(uri, values);
             default:
@@ -120,10 +121,10 @@ public class InventoryProvider extends ContentProvider {
             throw new IllegalArgumentException("Sold amount required");
 
         long id = database.insert(InventoryContract.InventoryEntry.TABLE_NAME, null, values);
-        if (id == -1){
+        if (id == -1) {
             Log.e(LOG_TAG, "Failed to insert row for " + uri);
             return null;
-        }else{
+        } else {
             Log.e(LOG_TAG, "ENTRY WORKED " + uri);
         }
         getContext().getContentResolver().notifyChange(uri, null);
@@ -157,13 +158,13 @@ public class InventoryProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         final int match = sUriMatcher.match(uri);
-        switch (match){
+        switch (match) {
             case INVENTORY:
                 return updateItem(uri, values, selection, selectionArgs);
             case INVENTORY_ID:
                 selection = InventoryContract.InventoryEntry._ID + "=?";
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
-                return updateItem(uri, values, selection,selectionArgs);
+                return updateItem(uri, values, selection, selectionArgs);
             default:
                 throw new IllegalArgumentException("Update is not supported for " + uri);
         }
@@ -182,7 +183,7 @@ public class InventoryProvider extends ContentProvider {
             throw new IllegalArgumentException("Supplier name required");
         if (values.containsKey(InventoryContract.InventoryEntry.COLUMN_INVENTORY_SUPPLIER_EMAIL) && supplierEmail == null)
             throw new IllegalArgumentException("Supplier email required");
-        if (values.containsKey(InventoryContract.InventoryEntry.COLUMN_INVENTORY_NAME) && name == null )
+        if (values.containsKey(InventoryContract.InventoryEntry.COLUMN_INVENTORY_NAME) && name == null)
             throw new IllegalArgumentException("Item name required");
         if (values.containsKey(InventoryContract.InventoryEntry.COLUMN_INVENTORY_PRICE) && price == null)
             throw new IllegalArgumentException("Price required");
@@ -192,8 +193,8 @@ public class InventoryProvider extends ContentProvider {
             throw new IllegalArgumentException("Sold amount required");
 
         int rowsUpdated = database.update(InventoryContract.InventoryEntry.TABLE_NAME, values, selection, selectionArgs);
-        if (rowsUpdated!=0){
-            getContext().getContentResolver().notifyChange(uri,null);
+        if (rowsUpdated != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
         }
         return rowsUpdated;
     }

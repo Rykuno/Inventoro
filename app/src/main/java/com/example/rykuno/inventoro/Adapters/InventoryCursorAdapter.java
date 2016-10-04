@@ -18,14 +18,17 @@ import android.widget.TextView;
 import com.example.rykuno.inventoro.Data.InventoryContract;
 import com.example.rykuno.inventoro.R;
 
+import java.text.NumberFormat;
+
 /**
  * Created by rykuno on 9/29/16.
  */
 
 public class InventoryCursorAdapter extends CursorAdapter {
     Context mContext;
+
     public InventoryCursorAdapter(Context context, Cursor c) {
-        super(context, c,0);
+        super(context, c, 0);
         mContext = context;
     }
 
@@ -56,7 +59,7 @@ public class InventoryCursorAdapter extends CursorAdapter {
                 int newStock;
                 int newSold;
 
-                if (stock>0) {
+                if (stock > 0) {
                     newStock = stock - 1;
                     newSold = sold + 1;
                     ContentValues values = new ContentValues();
@@ -66,7 +69,7 @@ public class InventoryCursorAdapter extends CursorAdapter {
                     mContext.getContentResolver().update(uri, values, null, null);
                 } else {
                     Intent intent = new Intent(Intent.ACTION_SENDTO);
-                    intent.setData(Uri.parse("mailto: "+ providerEmail)); // only email apps should handle this
+                    intent.setData(Uri.parse("mailto: " + providerEmail)); // only email apps should handle this
                     intent.putExtra(Intent.EXTRA_EMAIL, provider);
                     intent.putExtra(Intent.EXTRA_SUBJECT, "Order Request: " + name);
                     if (intent.resolveActivity(mContext.getPackageManager()) != null) {
@@ -78,31 +81,26 @@ public class InventoryCursorAdapter extends CursorAdapter {
 
         tvName.setText(name);
         tvProvider.setText(provider);
+        tvPrice.setText(formatPrice(price));
 
-        if (!price.contains(".")){
-            if (price.contains("$")){
-                tvPrice.setText(price + ".00");
-            }else {
-                tvPrice.setText("$" + price + ".00");
-            }
-        }else {
-            if (price.contains("$")){
-                tvPrice.setText(price);
-            }else {
-                tvPrice.setText("$" + price);
-            }
-        }
 
-        if (stock==0){
+        if (stock == 0) {
             tvStock.setText("Out of stock");
             tvStock.setTextColor(Color.RED);
             sellButton.setText("Order");
             sellButton.getBackground().setColorFilter(0xffffffff, PorterDuff.Mode.MULTIPLY);
-        }else{
-            tvStock.setText("Stock: "+ stock);
+        } else {
+            tvStock.setText("Stock: " + stock);
             tvStock.setTextColor(Color.GRAY);
             sellButton.setText("SELL");
             sellButton.getBackground().setColorFilter(0xFF00FF00, PorterDuff.Mode.MULTIPLY);
         }
+    }
+
+    private String formatPrice(String price) {
+        price = price.replace(mContext.getString(R.string.dollar_sign), mContext.getString(R.string.empty_text));
+        double money = Double.valueOf(price);
+        NumberFormat formatter = NumberFormat.getCurrencyInstance();
+        return formatter.format(money);
     }
 }

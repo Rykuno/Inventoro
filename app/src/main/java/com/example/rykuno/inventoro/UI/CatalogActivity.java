@@ -21,17 +21,22 @@ import com.example.rykuno.inventoro.Adapters.InventoryCursorAdapter;
 import com.example.rykuno.inventoro.Data.InventoryContract;
 import com.example.rykuno.inventoro.R;
 
-public class CatalogActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+public class CatalogActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final int INVENTORY_LOADER = 0;
     private InventoryCursorAdapter mAdapter;
-    private ListView mListView;
+    @BindView(R.id.list_view)
+    ListView mListView;
+    @BindView(R.id.empty_view)
+    View emptyView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalog);
-        mListView = (ListView) findViewById(R.id.list_view);
-        View emptyView = findViewById(R.id.empty_view);
+        ButterKnife.bind(this);
         mListView.setEmptyView(emptyView);
         mAdapter = new InventoryCursorAdapter(this, null);
         mListView.setAdapter(mAdapter);
@@ -65,8 +70,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId())
-        {
+        switch (item.getItemId()) {
             case R.id.action_insert_dummy_data:
                 insertItem();
                 return true;
@@ -103,10 +107,10 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
                 InventoryContract.InventoryEntry.COLUMN_INVENTORY_STOCK,
                 InventoryContract.InventoryEntry.COLUMN_INVENTORY_PRICE,
                 InventoryContract.InventoryEntry.COLUMN_INVENTORY_SOLD,
-               };
+        };
 
         return new CursorLoader(this, InventoryContract.InventoryEntry.CONTENT_URI,
-                projection, null, null,null);
+                projection, null, null, null);
     }
 
     @Override

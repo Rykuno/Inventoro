@@ -44,5 +44,6 @@
     <string name="item_stock">Item Stock:</string>
     <string name="item_sold">Item Sold:</string>
     <string name="email_order_request">"Order Request: "</string>
+    <string name="dollar_sign">$</string>
 
 </resources>
